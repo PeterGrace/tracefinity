@@ -402,16 +402,7 @@ export default function HomePage() {
     <div className="max-w-6xl mx-auto py-4 space-y-6">
       {/* upload */}
       <div data-tour="upload">
-        <ImageUploader onUpload={handleUpload} disabled={uploading} />
-        <div className="flex justify-center mt-3">
-          <button
-            type="button"
-            onClick={() => setShowNewShape(true)}
-            className="px-3 py-1.5 rounded text-sm bg-inset hover:bg-inset/70"
-          >
-            Or draw a shape
-          </button>
-        </div>
+        <ImageUploader onUpload={handleUpload} onDrawShape={() => setShowNewShape(true)} disabled={uploading} />
       </div>
 
       <NewShapeDialog open={showNewShape} onClose={() => setShowNewShape(false)} />
