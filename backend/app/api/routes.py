@@ -975,6 +975,9 @@ async def update_tool(request: Request, tool_id: str, req: ToolUpdateRequest, us
 @router.post("/tools", response_model=Tool)
 async def create_tool(request: Request, req: ToolCreateRequest, user_id: str = Depends(get_user_id)):
     """create a tool directly from drawn/parametric points (mm, origin-centered)."""
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="tool name is required")
     if len(req.points) < 3:
         raise HTTPException(status_code=400, detail="a tool needs at least 3 points")
 
@@ -987,7 +990,7 @@ async def create_tool(request: Request, req: ToolCreateRequest, user_id: str = D
 
     tool = Tool(
         id=tool_id,
-        name=req.name,
+        name=name,
         points=req.points,
         finger_holes=req.finger_holes,
         interior_rings=req.interior_rings,

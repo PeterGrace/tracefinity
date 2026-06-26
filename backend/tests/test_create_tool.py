@@ -46,3 +46,19 @@ def test_create_tool_rejects_too_few_points(tmp_path, monkeypatch):
     })
 
     assert resp.status_code == 400
+
+
+def test_create_tool_rejects_blank_name(tmp_path, monkeypatch):
+    client = _client(tmp_path, monkeypatch)
+
+    resp = client.post("/api/tools", json={
+        "name": "   ",
+        "points": [
+            {"x": -10, "y": -5},
+            {"x": 10, "y": -5},
+            {"x": 10, "y": 5},
+            {"x": -10, "y": 5},
+        ],
+    })
+
+    assert resp.status_code == 400
