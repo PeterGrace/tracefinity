@@ -110,18 +110,18 @@ export function NewShapeDialog({ open, onClose }: { open: boolean; onClose: () =
         <div className="grid grid-cols-2 gap-3 text-sm">
           <label className="flex flex-col gap-1">
             <span className="text-text-muted">{type === 'circle' ? 'Diameter (mm)' : 'Width (mm)'}</span>
-            <NumericInput value={width} min={1} max={10000} onChange={setWidth} className="bg-inset rounded px-2 py-1" />
+            <NumericInput value={width} min={1} max={10000} step={0.1} onChange={setWidth} className="bg-inset rounded px-2 py-1" />
           </label>
           {type !== 'circle' && (
             <label className="flex flex-col gap-1">
               <span className="text-text-muted">Height (mm)</span>
-              <NumericInput value={height} min={1} max={10000} onChange={setHeight} className="bg-inset rounded px-2 py-1" />
+              <NumericInput value={height} min={1} max={10000} step={0.1} onChange={setHeight} className="bg-inset rounded px-2 py-1" />
             </label>
           )}
           {type === 'rectangle' && (
             <label className="flex flex-col gap-1">
               <span className="text-text-muted">Corner radius (mm)</span>
-              <NumericInput value={cornerRadius} min={0} max={10000} onChange={setCornerRadius} className="bg-inset rounded px-2 py-1" />
+              <NumericInput value={cornerRadius} min={0} max={10000} step={0.1} onChange={setCornerRadius} className="bg-inset rounded px-2 py-1" />
             </label>
           )}
           <label className="flex flex-col gap-1 col-span-2">
