@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImageUploader } from '@/components/ImageUploader'
+import { NewShapeDialog } from '@/components/NewShapeDialog'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { SectionHeader } from '@/components/SectionHeader'
 import { uploadImage, listTools, listBins, listProjects, deleteTool, deleteBin, deleteProject, createBin, createProject, getImageUrl } from '@/lib/api'
@@ -228,6 +229,7 @@ function loadSectionCollapseState(): MainSectionCollapseState {
 export default function HomePage() {
   const router = useRouter()
   const [uploading, setUploading] = useState(false)
+  const [showNewShape, setShowNewShape] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toolsList, setToolsList] = useState<ToolSummary[]>([])
   const [binsList, setBinsList] = useState<BinSummary[]>([])
@@ -401,7 +403,18 @@ export default function HomePage() {
       {/* upload */}
       <div data-tour="upload">
         <ImageUploader onUpload={handleUpload} disabled={uploading} />
+        <div className="flex justify-center mt-3">
+          <button
+            type="button"
+            onClick={() => setShowNewShape(true)}
+            className="px-3 py-1.5 rounded text-sm bg-inset hover:bg-inset/70"
+          >
+            Or draw a shape
+          </button>
+        </div>
       </div>
+
+      <NewShapeDialog open={showNewShape} onClose={() => setShowNewShape(false)} />
 
       {uploading && (
         <div className="flex items-center justify-center gap-2 text-text-muted text-xs">
