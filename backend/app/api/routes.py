@@ -40,6 +40,7 @@ from app.models.schemas import (
     ToolSummary,
     ToolListResponse,
     ToolUpdateRequest,
+    ToolCreateRequest,
     SaveToolsRequest,
     SaveToolsResponse,
     BinProject,
@@ -72,7 +73,7 @@ from app.services.tool_store import ToolStore
 from app.services.bin_store import BinStore
 from app.services.project_store import ProjectStore
 from app.services.bin_service import sync_placed_tools
-from app.services.image_service import generate_tool_thumbnail
+from app.services.image_service import generate_tool_thumbnail, generate_outline_thumbnail
 from app.services.tracer_registry import TRACER_LABELS, tracer_kind, validate_tracer_ids
 from app.services.geometry import optimal_rotation_angle as _optimal_rotation_angle
 from app.services.project_service import (
@@ -969,6 +970,37 @@ async def update_tool(request: Request, tool_id: str, req: ToolUpdateRequest, us
         tool.needs_cleanup = req.needs_cleanup
     user_tools.set(tool_id, tool)
     return StatusResponse(status="ok")
+
+
+@router.post("/tools", response_model=Tool)
+async def create_tool(request: Request, req: ToolCreateRequest, user_id: str = Depends(get_user_id)):
+    """create a tool directly from drawn/parametric points (mm, origin-centered)."""
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="tool name is required")
+    if len(req.points) < 3:
+        raise HTTPException(status_code=400, detail="a tool needs at least 3 points")
+
+    _, user_tools, _ = get_stores(user_id)
+    up = _user_path(user_id)
+
+    tool_id = str(uuid.uuid4())
+    thumb_abs = generate_outline_thumbnail(req.points, tool_id, up / "tools")
+    thumbnail_path = _rel(thumb_abs, up) if thumb_abs else None
+
+    tool = Tool(
+        id=tool_id,
+        name=name,
+        points=req.points,
+        finger_holes=req.finger_holes,
+        interior_rings=req.interior_rings,
+        smoothed=req.smoothed,
+        smooth_level=req.smooth_level,
+        thumbnail_path=thumbnail_path,
+        created_at=datetime.utcnow().isoformat(),
+    )
+    user_tools.set(tool_id, tool)
+    return tool
 
 
 @router.post("/tools/{tool_id}/auto-rotate")

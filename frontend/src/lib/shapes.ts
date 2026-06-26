@@ -1,0 +1,89 @@
+import type { Point } from '@/types'
+
+// All generators return mm points centered at the origin, matching the
+// convention used by saved Tools.
+
+// Points are ordered counter-clockwise in standard math (Y-up) coordinates.
+
+// Arc resolution (segments) used for each rounded rectangle corner.
+const CORNER_SEGS = 8
+
+// Remove consecutive duplicate points and a final point that closes back onto
+// the first. Keeps degenerate (zero-length) edges out of generated polygons.
+function dedupeClosed(pts: Point[], eps = 1e-6): Point[] {
+  const out: Point[] = []
+  for (const p of pts) {
+    const prev = out[out.length - 1]
+    if (!prev || Math.hypot(p.x - prev.x, p.y - prev.y) > eps) out.push(p)
+  }
+  if (out.length > 1) {
+    const first = out[0]
+    const last = out[out.length - 1]
+    if (Math.hypot(last.x - first.x, last.y - first.y) <= eps) out.pop()
+  }
+  return out
+}
+
+export function rectangle(width: number, height: number, cornerRadius = 0): Point[] {
+  const hw = width / 2
+  const hh = height / 2
+  const r = Math.max(0, Math.min(cornerRadius, hw, hh))
+  if (r === 0) {
+    return [
+      { x: -hw, y: -hh },
+      { x: hw, y: -hh },
+      { x: hw, y: hh },
+      { x: -hw, y: hh },
+    ]
+  }
+  const seg = CORNER_SEGS
+  const corners = [
+    { cx: hw - r, cy: -(hh - r), start: -Math.PI / 2, end: 0 }, // top-right
+    { cx: hw - r, cy: hh - r, start: 0, end: Math.PI / 2 }, // bottom-right
+    { cx: -(hw - r), cy: hh - r, start: Math.PI / 2, end: Math.PI }, // bottom-left
+    { cx: -(hw - r), cy: -(hh - r), start: Math.PI, end: (3 * Math.PI) / 2 }, // top-left
+  ]
+  const pts: Point[] = []
+  for (const c of corners) {
+    for (let i = 0; i <= seg; i++) {
+      const a = c.start + ((c.end - c.start) * i) / seg
+      pts.push({ x: c.cx + r * Math.cos(a), y: c.cy + r * Math.sin(a) })
+    }
+  }
+  return dedupeClosed(pts)
+}
+
+export function ellipse(width: number, height: number, segments = 64): Point[] {
+  const rx = width / 2
+  const ry = height / 2
+  const pts: Point[] = []
+  for (let i = 0; i < segments; i++) {
+    const a = (2 * Math.PI * i) / segments
+    pts.push({ x: rx * Math.cos(a), y: ry * Math.sin(a) })
+  }
+  return pts
+}
+
+export function circle(diameter: number, segments = 64): Point[] {
+  return ellipse(diameter, diameter, segments)
+}
+
+export type ShapeType = 'rectangle' | 'circle' | 'ellipse'
+
+export interface ShapeParams {
+  type: ShapeType
+  width: number // mm; diameter for circle
+  height: number // mm; ignored for circle
+  cornerRadius: number // mm; rectangle only
+}
+
+export function buildShape(p: ShapeParams): Point[] {
+  switch (p.type) {
+    case 'rectangle':
+      return rectangle(p.width, p.height, p.cornerRadius)
+    case 'circle':
+      return circle(p.width)
+    case 'ellipse':
+      return ellipse(p.width, p.height)
+  }
+}

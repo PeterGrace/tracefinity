@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImageUploader } from '@/components/ImageUploader'
+import { NewShapeDialog } from '@/components/NewShapeDialog'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { SectionHeader } from '@/components/SectionHeader'
 import { uploadImage, listTools, listBins, listProjects, deleteTool, deleteBin, deleteProject, createBin, createProject, getImageUrl } from '@/lib/api'
@@ -228,6 +229,7 @@ function loadSectionCollapseState(): MainSectionCollapseState {
 export default function HomePage() {
   const router = useRouter()
   const [uploading, setUploading] = useState(false)
+  const [showNewShape, setShowNewShape] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toolsList, setToolsList] = useState<ToolSummary[]>([])
   const [binsList, setBinsList] = useState<BinSummary[]>([])
@@ -400,8 +402,10 @@ export default function HomePage() {
     <div className="max-w-6xl mx-auto py-4 space-y-6">
       {/* upload */}
       <div data-tour="upload">
-        <ImageUploader onUpload={handleUpload} disabled={uploading} />
+        <ImageUploader onUpload={handleUpload} onDrawShape={() => setShowNewShape(true)} disabled={uploading} />
       </div>
+
+      <NewShapeDialog open={showNewShape} onClose={() => setShowNewShape(false)} />
 
       {uploading && (
         <div className="flex items-center justify-center gap-2 text-text-muted text-xs">

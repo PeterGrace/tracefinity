@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Upload } from 'lucide-react'
+import { Upload, Shapes } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 function UploadIllustration({ reduceMotion }: { reduceMotion: boolean }) {
@@ -152,10 +152,11 @@ function UploadIllustration({ reduceMotion }: { reduceMotion: boolean }) {
 
 interface Props {
   onUpload: (file: File) => void
+  onDrawShape?: () => void
   disabled?: boolean
 }
 
-export function ImageUploader({ onUpload, disabled }: Props) {
+export function ImageUploader({ onUpload, onDrawShape, disabled }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const reduceMotion = useReducedMotion()
@@ -235,10 +236,25 @@ export function ImageUploader({ onUpload, disabled }: Props) {
                 Take a top-down photo
               </li>
             </ul>
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-white text-sm font-semibold shadow-lg shadow-accent/20">
-              <Upload className="w-4 h-4" />
-              Upload photo
-            </span>
+            <div className="flex flex-wrap items-center gap-3 justify-center sm:justify-start">
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-white text-sm font-semibold shadow-lg shadow-accent/20">
+                <Upload className="w-4 h-4" />
+                Upload photo
+              </span>
+              {onDrawShape && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (!disabled) onDrawShape()
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-white text-sm font-semibold shadow-lg shadow-accent/20 cursor-pointer hover:bg-accent-hover transition-colors"
+                >
+                  <Shapes className="w-4 h-4" />
+                  Draw a shape
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

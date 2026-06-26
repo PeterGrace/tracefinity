@@ -192,6 +192,20 @@ export async function getTool(toolId: string): Promise<Tool> {
   return fetchApi(`/api/tools/${toolId}`)
 }
 
+export async function createTool(payload: {
+  name: string
+  points: Point[]
+  finger_holes?: import('@/types').FingerHole[]
+  interior_rings?: Point[][]
+  smoothed?: boolean
+  smooth_level?: number
+}): Promise<Tool> {
+  return fetchApi('/api/tools', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export async function updateTool(
   toolId: string,
   updates: {

@@ -289,6 +289,15 @@ class ToolUpdateRequest(BaseModel):
     needs_cleanup: bool | None = None
 
 
+class ToolCreateRequest(BaseModel):
+    name: str
+    points: list[Point]
+    finger_holes: list[FingerHole] = []
+    interior_rings: list[list[Point]] = []
+    smoothed: bool = False
+    smooth_level: float = 0.5
+
+
 class ToolListResponse(BaseModel):
     tools: list[ToolSummary]
 
