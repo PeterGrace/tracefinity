@@ -45,7 +45,9 @@ def generate_outline_thumbnail(
         pad = 20
         avail = size - 2 * pad
         span = max(w, h)
-        scale = avail / span if span > 0 else 1.0
+        if span <= 0:
+            return None
+        scale = avail / span
         off_x = (size - w * scale) / 2
         off_y = (size - h * scale) / 2
         img = Image.new("RGB", (size, size), "white")
