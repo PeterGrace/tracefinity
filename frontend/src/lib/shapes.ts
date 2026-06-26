@@ -3,6 +3,27 @@ import type { Point } from '@/types'
 // All generators return mm points centered at the origin, matching the
 // convention used by saved Tools.
 
+// Points are ordered counter-clockwise in standard math (Y-up) coordinates.
+
+// Arc resolution (segments) used for each rounded rectangle corner.
+const CORNER_SEGS = 8
+
+// Remove consecutive duplicate points and a final point that closes back onto
+// the first. Keeps degenerate (zero-length) edges out of generated polygons.
+function dedupeClosed(pts: Point[], eps = 1e-6): Point[] {
+  const out: Point[] = []
+  for (const p of pts) {
+    const prev = out[out.length - 1]
+    if (!prev || Math.hypot(p.x - prev.x, p.y - prev.y) > eps) out.push(p)
+  }
+  if (out.length > 1) {
+    const first = out[0]
+    const last = out[out.length - 1]
+    if (Math.hypot(last.x - first.x, last.y - first.y) <= eps) out.pop()
+  }
+  return out
+}
+
 export function rectangle(width: number, height: number, cornerRadius = 0): Point[] {
   const hw = width / 2
   const hh = height / 2
@@ -15,7 +36,7 @@ export function rectangle(width: number, height: number, cornerRadius = 0): Poin
       { x: -hw, y: hh },
     ]
   }
-  const seg = 8
+  const seg = CORNER_SEGS
   const corners = [
     { cx: hw - r, cy: -(hh - r), start: -Math.PI / 2, end: 0 }, // top-right
     { cx: hw - r, cy: hh - r, start: 0, end: Math.PI / 2 }, // bottom-right
@@ -29,7 +50,7 @@ export function rectangle(width: number, height: number, cornerRadius = 0): Poin
       pts.push({ x: c.cx + r * Math.cos(a), y: c.cy + r * Math.sin(a) })
     }
   }
-  return pts
+  return dedupeClosed(pts)
 }
 
 export function ellipse(width: number, height: number, segments = 64): Point[] {

@@ -39,6 +39,24 @@ describe('rectangle', () => {
     expect(b.maxX).toBeCloseTo(5)
     expect(b.maxY).toBeCloseTo(5)
   })
+
+  it('emits no zero-length edges when fully rounded (radius clamped)', () => {
+    const pts = rectangle(10, 10, 999)
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i]
+      const b = pts[(i + 1) % pts.length]
+      expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThan(1e-6)
+    }
+  })
+
+  it('emits no zero-length edges for a rounded non-square rectangle', () => {
+    const pts = rectangle(20, 10, 5) // radius clamps to 5 = height/2
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i]
+      const b = pts[(i + 1) % pts.length]
+      expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThan(1e-6)
+    }
+  })
 })
 
 describe('circle', () => {
@@ -61,5 +79,10 @@ describe('buildShape', () => {
   it('dispatches to the right generator', () => {
     expect(buildShape({ type: 'rectangle', width: 20, height: 10, cornerRadius: 0 })).toHaveLength(4)
     expect(buildShape({ type: 'circle', width: 20, height: 20, cornerRadius: 0 }).length).toBeGreaterThan(4)
+  })
+
+  it('dispatches ellipse', () => {
+    const pts = buildShape({ type: 'ellipse', width: 40, height: 20, cornerRadius: 0 })
+    expect(pts.length).toBeGreaterThan(4)
   })
 })
